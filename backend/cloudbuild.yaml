@@ -13,9 +13,21 @@ steps:
       - '-c'
       - |
         cd backend
-        npm ci
+        npm install
+        npm install -g typescript
         npm run build
         ls -la dist/
+
+  # 設定ファイルの準備
+  - name: 'node:18-alpine'
+    id: 'prepare-config'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        echo "設定ファイルを準備しています..."
+        cp ezdocs.yml backend/
+        ls -la backend/
 
   # Dockerイメージのビルド（AMD64アーキテクチャ用）
   - name: 'gcr.io/cloud-builders/docker'
