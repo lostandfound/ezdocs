@@ -8,6 +8,7 @@
 import { Router } from 'express';
 import { DocumentsController } from '../controllers/documents';
 import { validate } from '../middlewares/validate';
+import { sanitize } from '../middlewares/sanitize';
 import { paginationSchema } from '../../schemas/common';
 import { createDocumentSchema, updateDocumentSchema } from '../../schemas/documents';
 import { idParamSchema } from '../../schemas/params';
@@ -20,6 +21,7 @@ const documentsRouter = Router();
  */
 documentsRouter.get(
   '/',
+  sanitize(['query']),
   validate(paginationSchema, 'query'),
   DocumentsController.getDocuments
 );
@@ -30,6 +32,7 @@ documentsRouter.get(
  */
 documentsRouter.get(
   '/:id',
+  sanitize(['params']),
   validate(idParamSchema, 'params'),
   DocumentsController.getDocumentById
 );
@@ -40,6 +43,7 @@ documentsRouter.get(
  */
 documentsRouter.post(
   '/',
+  sanitize(['body']),
   validate(createDocumentSchema),
   DocumentsController.createDocument
 );
@@ -50,6 +54,7 @@ documentsRouter.post(
  */
 documentsRouter.put(
   '/:id',
+  sanitize(['params', 'body']),
   validate(idParamSchema, 'params'),
   validate(updateDocumentSchema),
   DocumentsController.updateDocument
@@ -61,6 +66,7 @@ documentsRouter.put(
  */
 documentsRouter.delete(
   '/:id',
+  sanitize(['params']),
   validate(idParamSchema, 'params'),
   DocumentsController.deleteDocument
 );

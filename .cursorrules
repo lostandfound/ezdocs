@@ -27,6 +27,8 @@ This flow is the first flow that will be executed when the user runs `!start` co
 - ユーザーが「draftをIssueに登録して」と指示した場合、あなたは docs/tasks/draft_task.md を github cli コマンドで Issue に登録してください。ラベルには `task` を付与します。
 - Issue に登録したら、あなたは issue番号が取得できます。draft_task.md をdocs/tasks/{issue番号}/task.md としてリネームしてください。
 - タスク一覧は、1つずつステップバイステップで実行してゆきます。
+- 作業結果は作業報告書 docs/tasks/{issue番号}/report.md に順次記載してください。タスク最上位の項目ごとにセクションを設け、実施日時を記載する必要があります。必ず `date` コマンドで現在の日時を確認してください。
+- タスクの中でテスト実装をすすめる段階になったら、テスト計画書 docs/tasks/{issue番号}/test.md を作成してください。これはテスト項目のチェックリストです。
 
 ### Trouble Shooting flow
 
@@ -76,3 +78,18 @@ TBD
 ## 6. 変更履歴
 - YYYY/MM/DD - バージョン1.0 - 初版作成 - 担当者名
 ```
+
+## 技術スタック
+### バックエンド
+- サーバレスプラットフォーム: Google Cloud Run（コンテナベースのサーバレスサービス）
+- プログラミング言語: Node.js, TypeScript
+- モジュールシステム: ECMAScript Modules (ESM)
+- Webフレームワーク: Express.js
+- バリデーション: Zod
+- ORM: Prisma
+- HTTPクライアント: node-fetch
+- テストフレームワーク: Vitest
+- コンテナ化: Docker
+- データベース: SQLite3（Google Cloud Storage上にマウント）
+- ストレージ: Google Cloud Storage
+- AI/ML処理: Gemini AI Studio API（Gemini 2.0 flashモデル）

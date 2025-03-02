@@ -1,15 +1,24 @@
 /**
- * APIルーター
+ * APIルーター設定
  * 
- * 各リソース別のルーターを集約し、APIのベースパスに接続します。
+ * 各リソースのルーターをまとめて、'/api'プレフィックスを付けてエクスポートします。
  */
 
 import { Router } from 'express';
+import sanitize from '../../middleware/sanitize';
 import documentsRouter from './documents';
 
-const apiRouter = Router();
+const router = Router();
 
-// 各リソースルーターをAPIルーターに接続
-apiRouter.use('/documents', documentsRouter);
+// 全リクエストに対してサニタイゼーションを適用
+router.use(sanitize);
 
-export default apiRouter; 
+// 各リソースのルーターを接続
+router.use('/documents', documentsRouter);
+
+// ヘルスチェックエンドポイント
+router.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+export default router; 
