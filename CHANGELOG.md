@@ -40,3 +40,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - Implemented secure handling of API keys and credentials
 - Set up proper IAM permissions with least privilege principle 
+
+## [0.0.2] - 2025-03-04
+
+### Added
+- REST API implementation for document resource
+  - CRUD endpoints with validation
+  - Request sanitization for security
+  - Error handling middleware
+  - Pagination support
+- OpenAPI specification (v2.0) for Google API Gateway
+- Database schema and migrations
+  - Document model implementation
+  - SQLite database configuration
+- Comprehensive test suite
+  - Unit tests for middleware and services
+  - Integration tests for API endpoints
+  - Test helpers and fixtures
+  - Test database management
+- Documentation
+  - API documentation in OpenAPI format
+  - Test plan and implementation report
+  - Database schema documentation
+
+### Security
+- Input validation using Zod schemas
+- XSS prevention with sanitization middleware
+- Request size limits (30MB)
+- Secure error handling 
