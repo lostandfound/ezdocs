@@ -322,3 +322,97 @@ steps:
       '--set-secrets', 'API_KEY=api-key:latest'
     ]
 ```
+
+## クラウドストレージバケットの設計と使用方法
+
+### ストレージ構造
+
+EzDocsでは、データベースファイルや文書ファイルを保存するために、一貫したストレージ構造を採用しています。開発環境と本番環境で同じディレクトリ構造を維持することで、環境間の移行をスムーズに行えるようにしています。
+
+```
+storage/
+├── db/                 # SQLiteデータベースファイル
+└── files/
+    └── pdf/            # PDF文書ファイル
+```
+
+### 環境別設定
+
+#### 開発環境
+
+開発環境では、ローカルファイルシステム上の`backend/storage`ディレクトリを使用します。
+この設定は`ezdocs.yml`の`development`セクションに定義されています：
+
+```yaml
+development:
+  database:
+    sqlite:
+      path: "../storage/db/development.db"
+```
+
+#### 本番環境
+
+本番環境では、Cloud Storageバケットをマウントして使用します。
+バケット名は`ezdocs-bucket-PROJECT_ID`の形式で、`PROJECT_ID`はGCPプロジェクトIDに置き換えられます。
+
+```yaml
+production:
+  database:
+    sqlite:
+      path: "/storage/db/production.db"
+  storage:
+    bucket: "ezdocs-bucket-PROJECT_ID"
+    region: "asia-northeast1"
+```
+
+### Cloud Storageバケットの作成
+
+バケットの作成は自動セットアップスクリプトで行われますが、手動で作成する場合は以下のコマンドを使用します：
+
+```bash
+# プロジェクトIDを取得
+PROJECT_ID=$(gcloud config get-value project)
+
+# バケットを作成（東京リージョン）
+gsutil mb -l asia-northeast1 gs://ezdocs-bucket-$PROJECT_ID
+```
+
+### Cloud Runでのバケットマウント設定
+
+Cloud Runサービスにバケットをマウントするための設定は`cloudbuild.yaml`に含まれています：
+
+```yaml
+# Cloud Runサービスのデプロイ
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+    - 'run'
+    - 'deploy'
+    - '${_SERVICE_NAME}'
+    - '--image'
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+    - '--region'
+    - '${_REGION}'
+    - '--platform'
+    - 'managed'
+    - '--update-volumes'
+    - 'storage-volume=gcsfuse,bucketName=${_BUCKET_NAME}'
+    - '--update-volume-mounts'
+    - 'storage-volume=/storage'
+```
+
+このマウント設定により、Cloud RunインスタンスはCloud Storageバケットを`/storage`ディレクトリとしてマウントします。
+
+### ファイルアクセスの抽象化
+
+アプリケーションコードからストレージにアクセスする際は、環境に依存しない相対パスを使用することを推奨します。
+これにより、開発環境と本番環境の両方で同じコードを使用できます。
+
+### 注意事項
+
+1. **ローカル開発時の注意点**：
+   - `backend/storage`ディレクトリはGitにコミットされる`.keep`ファイルのみを含み、実際のデータファイルは`.gitignore`に追加されています。
+   - Dockerビルド時には`backend/.dockerignore`で`storage`ディレクトリを除外しているため、コンテナイメージには含まれません。
+
+2. **デプロイ時の注意点**：
+   - 初回デプロイ時には、必要なディレクトリ構造がCloud Storageバケット内に自動的に作成されることを確認してください。
+   - バケットへの書き込み権限がCloud Runサービスアカウントに付与されていることを確認してください。

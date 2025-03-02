@@ -49,7 +49,9 @@ steps:
       '--region', '${_REGION}',
       '--platform', 'managed',
       '--allow-unauthenticated',
-      '--set-env-vars', 'NODE_ENV=production,LOG_LEVEL=info,APP_NAME=EzDocs,APP_VERSION=${_TAG},API_TIMEOUT=15000'
+      '--set-env-vars', 'NODE_ENV=production,LOG_LEVEL=info,APP_NAME=EzDocs,APP_VERSION=${_TAG},API_TIMEOUT=15000',
+      '--update-volumes', 'storage-volume=gcsfuse,bucketName=${_BUCKET_NAME}',
+      '--update-volume-mounts', 'storage-volume=/storage'
     ]
 
 # ビルド結果のイメージ
@@ -64,6 +66,7 @@ substitutions:
   _IMAGE: 'ezdocs-backend'
   _TAG: '${SHORT_SHA}'
   _SERVICE_NAME: 'ezdocs-backend'
+  _BUCKET_NAME: 'ezdocs-bucket-${PROJECT_ID}'
 
 # タイムアウト設定（最大2時間）
 timeout: '7200s'
