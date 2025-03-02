@@ -297,22 +297,47 @@ async function checkConfigFile() {
 async function installDependencies() {
   console.log(`${colors.bright}依存関係をインストールしています...${colors.reset}`);
   
-  // package.jsonの存在確認
-  const packageJsonPath = path.join(projectRoot, 'package.json');
-  if (!fs.existsSync(packageJsonPath)) {
+  // ルートディレクトリとbackendディレクトリのpackage.jsonをチェック
+  const rootPackageJsonPath = path.join(projectRoot, 'package.json');
+  const backendPackageJsonPath = path.join(projectRoot, 'backend', 'package.json');
+  
+  const rootPackageExists = fs.existsSync(rootPackageJsonPath);
+  const backendPackageExists = fs.existsSync(backendPackageJsonPath);
+  
+  if (!rootPackageExists && !backendPackageExists) {
     console.log(`${colors.yellow}package.jsonが見つかりません。依存関係のインストールをスキップします。${colors.reset}`);
     return;
   }
   
   const installDeps = await question('依存関係をインストールしますか？ (y/n): ');
   if (installDeps.toLowerCase() === 'y') {
-    try {
-      console.log('npmパッケージをインストール中...');
-      execSync('npm install', { stdio: 'inherit' });
-      console.log(`${colors.green}依存関係のインストール完了${colors.reset}\n`);
-    } catch (error) {
-      console.log(`${colors.red}依存関係のインストールエラー: ${error.message}${colors.reset}`);
+    // ルートディレクトリの依存関係をインストール
+    if (rootPackageExists) {
+      try {
+        console.log(`${colors.cyan}プロジェクトルートの依存関係をインストール中...${colors.reset}`);
+        execSync('npm install', { stdio: 'inherit', cwd: projectRoot });
+        console.log(`${colors.green}ルートディレクトリの依存関係のインストール完了${colors.reset}`);
+      } catch (error) {
+        console.log(`${colors.red}ルートディレクトリの依存関係のインストールエラー: ${error.message}${colors.reset}`);
+      }
+    } else {
+      console.log(`${colors.yellow}ルートディレクトリにpackage.jsonが見つかりません${colors.reset}`);
     }
+    
+    // backendディレクトリの依存関係をインストール
+    if (backendPackageExists) {
+      try {
+        console.log(`${colors.cyan}backendディレクトリの依存関係をインストール中...${colors.reset}`);
+        execSync('npm install', { stdio: 'inherit', cwd: path.join(projectRoot, 'backend') });
+        console.log(`${colors.green}backendディレクトリの依存関係のインストール完了${colors.reset}`);
+      } catch (error) {
+        console.log(`${colors.red}backendディレクトリの依存関係のインストールエラー: ${error.message}${colors.reset}`);
+      }
+    } else {
+      console.log(`${colors.yellow}backendディレクトリにpackage.jsonが見つかりません${colors.reset}`);
+    }
+    
+    console.log(`${colors.green}すべての依存関係のインストール完了${colors.reset}\n`);
   } else {
     console.log('依存関係のインストールをスキップします。');
   }
@@ -338,7 +363,6 @@ EzDocsのセットアップが完了しました！
 - 開発者ガイド: docs/dev.md
 - システム構成: docs/system.md
 
-お疑問があれば、プロジェクトリポジトリのIssuesをご利用ください。
 `);
 }
 
