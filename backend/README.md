@@ -54,6 +54,9 @@ backend/
 │   ├── api/         # API関連 (REST API実装)
 │   │   ├── routes/      # ルート定義
 │   │   └── controllers/ # コントローラー
+│   ├── schemas/     # バリデーションスキーマ
+│   │   ├── documents.ts   # ドキュメント用Zodスキーマ
+│   │   └── common.ts      # 共通で使用するZodスキーマ
 │   ├── models/      # データモデル定義
 │   ├── services/    # ビジネスロジック
 │   ├── types/       # 型定義
@@ -64,6 +67,18 @@ backend/
 │   └── files/         # ファイルストレージ
 └── tests/           # テストファイル
 ```
+
+### バリデーションスキーマ
+
+APIリクエストのバリデーションには[Zod](https://github.com/colinhacks/zod)を使用します。バリデーションスキーマは以下のように配置されています：
+
+- **リソース別スキーマ**: `src/schemas/[リソース名].ts`
+  - 例: `src/schemas/documents.ts` - ドキュメントリソース用のバリデーションスキーマ
+  
+- **共通スキーマ**: `src/schemas/common.ts`
+  - 複数のリソースで共通して使用するスキーマ
+
+この構成により、すべてのバリデーションスキーマが一元管理され、再利用性と保守性が向上します。
 
 ## APIエンドポイント
 
