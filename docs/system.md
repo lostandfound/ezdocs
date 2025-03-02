@@ -92,6 +92,7 @@ TBD
 ### 3.1 バックエンド
 - サーバレスプラットフォーム: Google Cloud Run（コンテナベースのサーバレスサービス）
 - プログラミング言語: Node.js, TypeScript
+- モジュールシステム: ECMAScript Modules (ESM)
 - Webフレームワーク: Express.js
 - バリデーション: Zod
 - ORM: Prisma
