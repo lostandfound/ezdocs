@@ -20,7 +20,7 @@ development:
       path: "./data/development.db"
   storage:
     bucket: "ezdocs-dev-bucket"
-    region: "us-central1"
+    region: "ap-northeast-1"
   gemini:
     apiKey: "gemini-api-key-placeholder"  # 実際の値に置き換えてください
     model: "gemini-2.0-flash"
@@ -39,7 +39,7 @@ production:
       path: "/mnt/storage/production.db"
   storage:
     bucket: "ezdocs-production-bucket"
-    region: "us-central1"
+    region: "ap-northeast-1"
   gemini:
     apiKey: "gemini-api-key-placeholder"  # 実際の値に置き換えてください
     model: "gemini-2.0-flash"

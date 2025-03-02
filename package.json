@@ -20,7 +20,7 @@
     "bibliography"
   ],
   "author": "EzDocs Team",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "dependencies": {
     "js-yaml": "^4.1.0"
   },
