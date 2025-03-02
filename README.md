@@ -122,5 +122,6 @@ ezdocs/
 - [要件定義書](docs/req.md)
 - [システム構成](docs/system.md)
 - [開発者用](docs/dev.md)
+- [データベース設計書](docs/db.md)
 - [API仕様書](docs/api.md)
 - [ユーザーズマニュアル](docs/user.md)
