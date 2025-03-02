@@ -174,7 +174,25 @@ Cloud Buildを使用した継続的デプロイメントの設定については
 - GCPプロジェクトでCloud Build APIが有効化されていること
 - 適切なIAM権限が設定されていること
 
-### Cloud Buildトリガーの設定
+### 自動セットアップ（推奨）
+
+EzDocsプロジェクトには、CI/CD環境のセットアップを自動化するスクリプトが含まれています。以下のコマンドを実行することで、必要な設定を一括して行うことができます：
+
+```bash
+# プロジェクトルートディレクトリで実行
+node scripts/setup.js
+```
+
+このスクリプトは以下の処理を自動的に実行します：
+- 必要なGCP APIの有効化
+- Artifact Registryリポジトリの作成
+- Cloud Buildサービスアカウントへの必要な権限の付与
+- GitHubリポジトリとの連携設定のガイド
+- Cloud Buildトリガーの設定
+
+### 手動でのCloud Buildトリガーの設定
+
+自動セットアップを使用しない場合は、以下の手順で手動設定が可能です：
 
 #### 1. cloudbuild.yamlファイルの作成
 
@@ -218,6 +236,11 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:$SERVICE_ACCOUNT" \
   --role="roles/iam.serviceAccountUser"
+
+# Artifact Registry書き込み権限の付与
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$SERVICE_ACCOUNT" \
+  --role="roles/artifactregistry.writer"
 ```
 
 #### 5. 手動トリガーのテスト
@@ -231,6 +254,21 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 1. GitHubリポジトリのmasterブランチに変更をプッシュします
 2. GCPコンソールの「Cloud Build」→「履歴」でビルドの進行状況を確認します
 3. ビルドが成功したら、Cloud Runサービスに新しいリビジョンがデプロイされていることを確認します
+
+### CI/CDパイプラインの動作フロー
+
+EzDocsのCI/CDパイプラインは以下のように動作します：
+
+1. 開発者がGitHubリポジトリのmasterブランチに変更をプッシュ
+2. GitHubからCloud Buildに通知が送信される
+3. Cloud Buildがcloudbuild.yamlに基づいて以下を実行：
+   - ソースコードのクローン
+   - 依存関係のインストール
+   - アプリケーションのビルド
+   - Dockerイメージの構築
+   - イメージのArtifact Registryへのプッシュ
+   - Cloud Runサービスの更新
+4. デプロイ完了後、新しいバージョンが自動的に公開される
 
 ### トラブルシューティング
 

@@ -4,6 +4,7 @@
   "description": "クラウドベースのシンプルなドキュメント管理システム",
   "scripts": {
     "setup": "node scripts/setup.js",
+    "setup-dev": "node scripts/setup-dev.js",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "repository": {

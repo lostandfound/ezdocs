@@ -45,7 +45,7 @@
    ```
    作成した`ezdocs.yml`を編集し、APIキーなどの必要な情報を入力してください。
 
-2. **セットアップスクリプトの実行**
+2. **基本セットアップスクリプトの実行**
    ```
    npm install
    npm run setup
@@ -54,11 +54,31 @@
    - 前提条件の確認（Node.js、gcloud）
    - ezdocs.yml設定ファイルの存在確認
    - Google Cloudプロジェクトの選択または作成
-   - 必要なGCP APIの有効化
+   - 必要なGCP APIの有効化（Cloud Storage、Cloud Run、API Gateway）
    - 必要なディレクトリの作成
-   - 依存関係のインストール（プロジェクトルートとbackendディレクトリの両方）
+   - 依存関係のインストール
 
-セットアップスクリプトは対話式で実行され、必要な情報の入力を求められます。
+3. **開発者向け拡張セットアップ（CI/CD環境構築）**
+   ```
+   npm run setup-dev
+   ```
+   このスクリプトは開発者向けの拡張機能を設定します：
+   - Artifact Registryリポジトリの作成
+     - リポジトリ名: `ezdocs-repo`（デフォルト）
+     - リージョン: `asia-northeast1`（デフォルト）
+   - Cloud Build用サービスアカウントの作成と権限設定
+     - サービスアカウント名: `ezdocs-cloudbuild@[PROJECT_ID].iam.gserviceaccount.com`
+     - 付与される権限:
+       - Cloud Run管理者 (roles/run.admin)
+       - サービスアカウントユーザー (roles/iam.serviceAccountUser)
+       - Artifact Registry書き込み (roles/artifactregistry.writer)
+       - ログ書き込み (roles/logging.logWriter)
+   - GitHub連携とCloud Buildトリガーの設定
+
+ユーザーはステップ1と2だけを実行すれば基本機能が使えます。
+開発者は全ステップを実行して、CI/CD環境もセットアップしてください。
+
+各セットアップスクリプトは対話式で実行され、必要な情報の入力を求められます。
 各ステップで詳細な説明が表示されるので、指示に従って操作してください。
 
 ## フォルダ構成
