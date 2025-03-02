@@ -653,3 +653,25 @@ cp backend/storage/db/backup/dev_backup_YYYYMMDD.db backend/storage/db/developme
 # Cloud Run内での復元スクリプト実行
 cp /storage/db/backup/production_backup_YYYYMMDD.db /storage/db/production.db
 ```
+
+## APIリクエスト設定
+
+バックエンドAPIは以下のJSON処理設定を採用しています：
+
+### リクエストサイズ制限
+
+- JSONリクエストの最大サイズ: **30MB**
+  - この拡張サイズは主にbase64エンコードされたPDFファイル送信をサポートするために設定されています
+  - 通常のメタデータリクエストは1MB以下に抑えることを推奨します
+
+### 入力検証と保護
+
+- すべてのAPIエンドポイントはZodスキーマによる入力検証を実施
+- XSS対策としてDOMPurifyによる入力サニタイズ処理を実装
+- バリデーションエラーは詳細なエラーメッセージとともに400エラーとして返却
+
+### 開発者向け注意事項
+
+- 大きなJSONペイロードを送信する際は、APIゲートウェイのタイムアウト設定に注意してください
+- 開発環境では30MBまで許可していますが、本番環境ではさらに制限が課される可能性があります
+- 大容量のデータ転送が必要な場合は、専用のストレージAPIを使用することを検討してください
