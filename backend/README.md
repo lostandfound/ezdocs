@@ -36,6 +36,35 @@ docker compose up --build
 docker compose up -d
 ```
 
+## プロジェクト構造
+
+バックエンドは以下のようなフォルダ構造になっています：
+
+```
+backend/
+├── prisma/          # Prisma関連ファイル
+│   ├── schema.prisma   # データベーススキーマ定義
+│   └── migrations/     # マイグレーションファイル
+├── src/
+│   ├── config/      # 設定ファイル
+│   │   └── env.ts      # 環境変数の読み込み
+│   ├── db/          # データベース関連
+│   │   ├── migrations.ts  # マイグレーション実行
+│   │   └── prisma.ts      # Prismaクライアント
+│   ├── api/         # API関連 (REST API実装)
+│   │   ├── routes/      # ルート定義
+│   │   └── controllers/ # コントローラー
+│   ├── models/      # データモデル定義
+│   ├── services/    # ビジネスロジック
+│   ├── types/       # 型定義
+│   ├── utils/       # 共通ユーティリティ
+│   └── index.ts     # アプリケーションのエントリーポイント
+├── storage/         # ローカル開発用ストレージ
+│   ├── db/            # データベースファイル
+│   └── files/         # ファイルストレージ
+└── tests/           # テストファイル
+```
+
 ## APIエンドポイント
 
 現在、以下のエンドポイントが実装されています：
