@@ -21,9 +21,39 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 
 // ミドルウェアの設定
-app.use(helmet()); // セキュリティヘッダーの設定
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+  xssFilter: true,
+  noSniff: true, 
+  referrerPolicy: { policy: 'same-origin' },
+})); // セキュリティヘッダーの設定
 app.use(cors());   // CORS対応
-app.use(express.json()); // JSONリクエストパーシング
+app.use(express.json({
+  limit: '30mb', // JSONデータのサイズ制限（PDFファイルのbase64エンコードに対応）
+  verify: (req, res, buf) => {
+    try {
+      JSON.parse(buf.toString());
+    } catch (e) {
+      (res as express.Response).status(400).json({
+        status: 'error',
+        code: 'INVALID_JSON',
+        message: '不正なJSONフォーマットです'
+      });
+      throw new Error('Invalid JSON');
+    }
+  }
+})); // JSONリクエストパーシング（セキュリティ強化）
 app.use(morgan('combined')); // リクエストロギング
 
 // レスポンス型の定義（Zodによる型検証）
