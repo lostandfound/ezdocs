@@ -10,6 +10,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { z } from 'zod';
+import { runMigrations } from './db/migrations'; // マイグレーションヘルパーのインポート
 
 // アプリケーションのポート設定
 const PORT = process.env.PORT || 8080;
@@ -29,9 +30,13 @@ const HealthResponseSchema = z.object({
   timestamp: z.string(),
   version: z.string(),
   environment: z.string(),
+  db_migration_status: z.string().optional(),
 });
 
 type HealthResponse = z.infer<typeof HealthResponseSchema>;
+
+// マイグレーションの状態を追跡する変数
+let migrationStatus: 'pending' | 'success' | 'failed' = 'pending';
 
 /**
  * ヘルスチェックエンドポイント
@@ -49,16 +54,38 @@ app.get('/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     version: version,
     environment: environment,
+    db_migration_status: migrationStatus,
   };
   
   return res.status(200).json(healthResponse);
 });
 
-// サーバーの起動
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Health check available at: http://localhost:${PORT}/health`);
-});
+// アプリケーション起動関数
+async function startServer() {
+  try {
+    // マイグレーションを実行
+    console.log('Checking and running database migrations...');
+    const migrationResult = await runMigrations();
+    migrationStatus = migrationResult ? 'success' : 'failed';
+    
+    if (!migrationResult) {
+      console.warn('Migration failed, but starting server anyway...');
+    }
+    
+    // サーバーの起動
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Health check available at: http://localhost:${PORT}/health`);
+      console.log(`Database migration status: ${migrationStatus}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// サーバー起動
+startServer();
 
 // 未処理の例外をキャッチしてクラッシュを防止
 process.on('uncaughtException', (error: Error) => {
