@@ -11,6 +11,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { z } from 'zod';
 import { runMigrations } from './db/migrations'; // マイグレーションヘルパーのインポート
+import apiRouter from './api/routes'; // APIルーターのインポート
+import { errorHandler } from './api/middlewares/error-handler'; // エラーハンドラーのインポート
 
 // アプリケーションのポート設定
 const PORT = process.env.PORT || 8080;
@@ -60,6 +62,12 @@ app.get('/health', (req: Request, res: Response) => {
   return res.status(200).json(healthResponse);
 });
 
+// APIルーターをアプリケーションに接続
+app.use('/api', apiRouter);
+
+// グローバルエラーハンドラーを設定（必ず他のミドルウェアの後に配置）
+app.use(errorHandler);
+
 // アプリケーション起動関数
 async function startServer() {
   try {
@@ -76,6 +84,7 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
       console.log(`Health check available at: http://localhost:${PORT}/health`);
+      console.log(`API available at: http://localhost:${PORT}/api`);
       console.log(`Database migration status: ${migrationStatus}`);
     });
   } catch (error) {
