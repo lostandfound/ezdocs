@@ -1,0 +1,48 @@
+# EzDocs設定ファイル - サンプル
+# 実際の使用時はこのファイルをezdocs.ymlにコピーして適切な値に変更してください
+
+common:
+  app:
+    name: "EzDocs"
+    version: "1.0.0"
+  api:
+    cors:
+      allowedOrigins: ["*"]
+      
+development:
+  api:
+    gateway:
+      url: "https://dev-api-gateway.example.com"
+      key: "dev-api-key-placeholder"  # 実際の値に置き換えてください
+    timeout: 30000
+  database:
+    sqlite:
+      path: "./data/development.db"
+  storage:
+    bucket: "ezdocs-dev-bucket"
+    region: "us-central1"
+  gemini:
+    apiKey: "gemini-api-key-placeholder"  # 実際の値に置き換えてください
+    model: "gemini-2.0-flash"
+    timeout: 60000
+  logging:
+    level: "debug"
+    
+production:
+  api:
+    gateway:
+      url: "https://api-gateway.example.com"
+      key: "prod-api-key-placeholder"  # 実際の値に置き換えてください
+    timeout: 15000
+  database:
+    sqlite:
+      path: "/mnt/storage/production.db"
+  storage:
+    bucket: "ezdocs-production-bucket"
+    region: "us-central1"
+  gemini:
+    apiKey: "gemini-api-key-placeholder"  # 実際の値に置き換えてください
+    model: "gemini-2.0-flash"
+    timeout: 30000
+  logging:
+    level: "info" 

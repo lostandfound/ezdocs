@@ -1,0 +1,41 @@
+# アプリケーション設定
+ezdocs.yml
+
+# 依存関係
+node_modules/
+package-lock.json
+yarn.lock
+npm-debug.log
+yarn-error.log
+
+# ビルド結果
+dist/
+build/
+*.js.map
+
+# 環境変数
+.env
+.env.local
+.env.*
+
+# エディタ関連
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS関連
+.DS_Store
+Thumbs.db
+
+# ログとデータ
+*.log
+logs/
+data/
+*.sqlite
+*.db
+
+# その他
+.cache/
+coverage/
+tmp/ 
