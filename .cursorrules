@@ -1,5 +1,25 @@
+## Commands
+If user run the following commands, you will execute the corresponding flows.
 
-### タスク作成
+- `!start` - begin "The Start flow"
+- `!new` - begin "The New Task flow"
+- `!trouble` - begin "Trouble Shooting flow"
+- `!doc` - begin "Documentation flow"
+
+## Flows
+
+### The Start flow
+
+This flow is the first flow that will be executed when the user runs `!start` command. You will understand the project structure and the main concepts.
+
+1. Run `date` command
+2. Run `uname -a` command
+3. Run `whoami` command
+4. Run `tree -I "node_modules|dist"` command and understand this project structure
+5. Read `README.md` file
+6. Read `docs/` directory and all `*.md` files
+
+### New Task flow
 
 - 複雑な作業は「タスク」として、docs/tasks/ ディレクトリに作業項目を作成することを提案してください。
 - 最初に作業項目書を docs/tasks/draft_task.md に作成してください。
@@ -8,7 +28,15 @@
 - Issue に登録したら、あなたは issue番号が取得できます。draft_task.md をdocs/tasks/{issue番号}/task.md としてリネームしてください。
 - タスク一覧は、1つずつステップバイステップで実行してゆきます。
 
-## ドキュメンテーション
+### Trouble Shooting flow
+
+このフローは、問題が発生したときに実行します。
+
+1. **考えられる原因の特定:** 問題の原因として考えられるものを5～7つ挙げてください。
+2. **最も可能性の高い原因の絞り込み:** 上記で挙げた原因の中から、最も可能性が高いと考えられるものを1～2つに絞り込んでください。
+3. **仮説検証のためのログ追加:** 実際のコード修正に進む前に、絞り込んだ原因仮説を検証するために、どのようなログをコードに追加すべきか検討し、ログの追加箇所を具体的に記述してください。
+
+## Documentation
 
 - ユーザーが記述したい内容を相談されたらどこに記述するべきか提案してください。または新規のドキュメントの作成を提案してください。
   - [要件定義書](docs/req.md)
