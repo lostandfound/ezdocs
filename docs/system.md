@@ -78,7 +78,8 @@ graph TB
    - Cloud Run：Node.jsバックエンドサービスの実行環境
 
 3. **アプリケーションレイヤー**
-   - バックエンドサービス：TypeScriptで実装されたビジネスロジック
+   - バックエンドサービス：Express.jsフレームワークを使用し、TypeScriptで実装されたビジネスロジック
+   - バリデーション：Zodによる型安全なデータ検証
    - AIサービス連携：OCRと書誌情報抽出のための外部AI API連携
 
 4. **フロントエンドレイヤー（オプション）**
@@ -91,6 +92,8 @@ TBD
 ### 3.1 バックエンド
 - サーバレスプラットフォーム: Google Cloud Run（コンテナベースのサーバレスサービス）
 - プログラミング言語: Node.js, TypeScript
+- Webフレームワーク: Express.js
+- バリデーション: Zod
 - ORM: Prisma
 - HTTPクライアント: node-fetch
 - テストフレームワーク: Vitest
