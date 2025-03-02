@@ -21,9 +21,6 @@ RUN npm run build
 # ビルド結果を確認（ファイルがあるか確認するためのデバッグステップ）
 RUN ls -la dist/ || echo "dist directory is empty or not created"
 
-# 設定ファイルをコピー
-COPY ezdocs.yml ./
-
 # 実行ステージ
 FROM node:18-alpine
 
@@ -37,9 +34,6 @@ RUN npm install --omit=dev
 
 # ビルド済みのコードをコピー
 COPY --from=builder /app/dist ./dist
-
-# 設定ファイルをコピー
-COPY --from=builder /app/ezdocs.yml ./
 
 # ビルド結果を確認（デバッグステップ）
 RUN ls -la dist/ || echo "dist directory is empty or not created"
