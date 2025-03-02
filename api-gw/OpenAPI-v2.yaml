@@ -1,0 +1,436 @@
+swagger: '2.0'
+info:
+  title: EzDocs API
+  description: |
+    EzDocs APIは、文書リソース（論文・書籍・レポートなど）のメタデータを管理するためのRESTful APIです。
+    このAPIを使用して、文書リソースの作成、取得、更新、削除などの操作を行うことができます。
+  version: 1.0.0
+  contact:
+    name: EzDocs API Support
+    email: support@ezdocs.example.com
+
+host: api.ezdocs.example.com
+basePath: /
+schemes:
+  - https
+  - http
+
+# サーバー環境の定義（注釈として残す）
+# 本番環境: https://api.ezdocs.example.com
+# ステージング環境: https://api.staging.ezdocs.example.com
+# 開発環境: http://localhost:3000
+
+tags:
+  - name: documents
+    description: 文書リソース操作
+
+paths:
+  /api/documents:
+    get:
+      summary: 文書リソース一覧の取得
+      description: ページネーション対応の文書リソース一覧を取得します。
+      operationId: getDocuments
+      tags:
+        - documents
+      parameters:
+        - name: page
+          in: query
+          description: 取得するページ番号（デフォルト: 1）
+          required: false
+          type: integer
+          default: 1
+          minimum: 1
+        - name: limit
+          in: query
+          description: 1ページあたりの件数（デフォルト: 20、最大: 100）
+          required: false
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 100
+      responses:
+        '200':
+          description: 成功レスポンス
+          schema:
+            $ref: '#/definitions/DocumentList'
+        '400':
+          description: 不正なリクエスト
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+    
+    post:
+      summary: 新規文書リソースの作成
+      description: 新しい文書リソースを作成します。
+      operationId: createDocument
+      tags:
+        - documents
+      parameters:
+        - name: document
+          in: body
+          description: 文書リソースのデータ
+          required: true
+          schema:
+            $ref: '#/definitions/DocumentCreateRequest'
+      responses:
+        '201':
+          description: 作成成功
+          schema:
+            $ref: '#/definitions/Document'
+        '400':
+          description: 不正なリクエスト
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+  
+  /api/documents/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: 文書リソースのID（UUID形式）
+        required: true
+        type: string
+        format: uuid
+    
+    get:
+      summary: 特定の文書リソースの取得
+      description: 指定されたIDの文書リソースを取得します。
+      operationId: getDocumentById
+      tags:
+        - documents
+      responses:
+        '200':
+          description: 成功レスポンス
+          schema:
+            $ref: '#/definitions/Document'
+        '404':
+          description: リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+    
+    put:
+      summary: 文書リソースの更新
+      description: 指定されたIDの文書リソースを更新します。
+      operationId: updateDocument
+      tags:
+        - documents
+      parameters:
+        - name: document
+          in: body
+          description: 文書リソースの更新データ
+          required: true
+          schema:
+            $ref: '#/definitions/DocumentUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/Document'
+        '400':
+          description: 不正なリクエスト
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+    
+    delete:
+      summary: 文書リソースの削除
+      description: 指定されたIDの文書リソースを削除します。
+      operationId: deleteDocument
+      tags:
+        - documents
+      responses:
+        '204':
+          description: 削除成功
+        '404':
+          description: リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  DocumentType:
+    type: string
+    enum:
+      - paper
+      - book
+      - other
+    description: |
+      文書の種類:
+      * `paper` - 論文（学術論文、研究レポートなど）
+      * `book` - 書籍（単行本、教科書など）
+      * `other` - その他の文書タイプ
+  
+  DocumentCreateRequest:
+    type: object
+    required:
+      - title
+    properties:
+      title:
+        type: string
+        description: 文書のタイトル
+      type:
+        $ref: '#/definitions/DocumentType'
+      abstract:
+        type: string
+        description: 論文の要約
+      year:
+        type: integer
+        description: 出版年
+      month:
+        type: integer
+        minimum: 1
+        maximum: 12
+        description: 出版月
+      day:
+        type: integer
+        minimum: 1
+        maximum: 31
+        description: 出版日
+      pages:
+        type: string
+        description: ページ範囲（例: '1-15'）
+      volume:
+        type: string
+        description: 巻号
+      issue:
+        type: string
+        description: 号
+      source:
+        type: string
+        description: 出典（例: 'Journal Name'）
+      publisher:
+        type: string
+        description: 出版社名
+      language:
+        type: string
+        description: 言語コード（例: 'ja', 'en'）
+      identifiers:
+        type: string
+        description: 識別子（例: DOI, ISBN）をJSON形式で格納 (例: "{\"doi\":\"10.1234/5678\",\"isbn\":\"978-4-1234-5678-9\"}")
+      urls:
+        type: string
+        description: 関連URLをJSON形式で格納 (例: "{\"publisher\":\"https://example.com/paper\"}")
+      keywords:
+        type: string
+        description: キーワードをJSON形式で格納 (例: "{\"keywords\":[\"人工知能\",\"機械学習\"]}")
+      ai_keywords:
+        type: string
+        description: AIが生成したキーワードをJSON形式で格納 (例: "{\"keywords\":[\"深層学習\",\"自然言語処理\"]}")
+  
+  DocumentUpdateRequest:
+    type: object
+    properties:
+      title:
+        type: string
+        description: 文書のタイトル
+      type:
+        $ref: '#/definitions/DocumentType'
+      abstract:
+        type: string
+        description: 論文の要約
+      year:
+        type: integer
+        description: 出版年
+      month:
+        type: integer
+        minimum: 1
+        maximum: 12
+        description: 出版月
+      day:
+        type: integer
+        minimum: 1
+        maximum: 31
+        description: 出版日
+      pages:
+        type: string
+        description: ページ範囲（例: '1-15'）
+      volume:
+        type: string
+        description: 巻号
+      issue:
+        type: string
+        description: 号
+      source:
+        type: string
+        description: 出典（例: 'Journal Name'）
+      publisher:
+        type: string
+        description: 出版社名
+      language:
+        type: string
+        description: 言語コード（例: 'ja', 'en'）
+      identifiers:
+        type: string
+        description: 識別子（例: DOI, ISBN）をJSON形式で格納 (例: "{\"doi\":\"10.1234/5678\",\"isbn\":\"978-4-1234-5678-9\"}")
+      urls:
+        type: string
+        description: 関連URLをJSON形式で格納 (例: "{\"publisher\":\"https://example.com/paper\"}")
+      keywords:
+        type: string
+        description: キーワードをJSON形式で格納 (例: "{\"keywords\":[\"人工知能\",\"機械学習\"]}")
+      ai_keywords:
+        type: string
+        description: AIが生成したキーワードをJSON形式で格納 (例: "{\"keywords\":[\"深層学習\",\"自然言語処理\"]}")
+  
+  Document:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: 文書のユニークID
+      title:
+        type: string
+        description: 文書のタイトル
+      type:
+        $ref: '#/definitions/DocumentType'
+      abstract:
+        type: string
+        description: 論文の要約
+      ai_summary:
+        type: string
+        description: AIが生成した要約
+      year:
+        type: integer
+        description: 出版年
+      month:
+        type: integer
+        description: 出版月
+      day:
+        type: integer
+        description: 出版日
+      pages:
+        type: string
+        description: ページ範囲（例: '1-15'）
+      volume:
+        type: string
+        description: 巻号
+      issue:
+        type: string
+        description: 号
+      source:
+        type: string
+        description: 出典（例: 'Journal Name'）
+      publisher:
+        type: string
+        description: 出版社名
+      language:
+        type: string
+        description: 言語コード（例: 'ja', 'en'）
+      identifiers:
+        type: string
+        description: 識別子（例: DOI, ISBN）をJSON形式で格納
+      urls:
+        type: string
+        description: 関連URLをJSON形式で格納
+      keywords:
+        type: string
+        description: キーワードをJSON形式で格納
+      ai_keywords:
+        type: string
+        description: AIが生成したキーワードをJSON形式で格納
+      created_at:
+        type: string
+        format: date-time
+        description: 作成日時
+      updated_at:
+        type: string
+        format: date-time
+        description: 更新日時
+  
+  DocumentSummary:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: 文書のユニークID
+      title:
+        type: string
+        description: 文書のタイトル
+      type:
+        $ref: '#/definitions/DocumentType'
+      year:
+        type: integer
+        description: 出版年
+      language:
+        type: string
+        description: 言語コード（例: 'ja', 'en'）
+      created_at:
+        type: string
+        format: date-time
+        description: 作成日時
+      updated_at:
+        type: string
+        format: date-time
+        description: 更新日時
+  
+  Pagination:
+    type: object
+    properties:
+      total:
+        type: integer
+        description: 全アイテム数
+      page:
+        type: integer
+        description: 現在のページ
+      limit:
+        type: integer
+        description: 1ページあたりの件数
+      pages:
+        type: integer
+        description: 総ページ数
+  
+  DocumentList:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/DocumentSummary'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  
+  Error:
+    type: object
+    required:
+      - status
+      - message
+    properties:
+      status:
+        type: string
+        description: エラー状態（常に 'error'）
+        example: error
+      code:
+        type: string
+        description: エラーコード
+        example: VALIDATION_ERROR
+      message:
+        type: string
+        description: エラーメッセージ
+        example: 入力データの検証に失敗しました
+      details:
+        type: object
+        description: エラーの詳細情報
+        additionalProperties:
+          type: string 

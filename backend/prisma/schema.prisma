@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 文書（論文、書籍、レポートなど）のメタデータを格納するテーブル
+model Document {
+  id          String    @id @default(uuid())
+  title       String?
+  type        String?   // 最大30文字
+  abstract    String?
+  ai_summary  String?
+  year        Int?
+  month       Int?
+  day         Int?
+  pages       String?
+  volume      String?
+  issue       String?
+  source      String?
+  publisher   String?
+  language    String?   // ISO 639-1言語コード（例: "ja", "en"）
+  identifiers String?   // JSON形式で保存
+  urls        String?   // JSON形式で保存
+  keywords    String?   // JSON形式で保存
+  ai_keywords String?   // JSON形式で保存
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  // リレーションシップ
+  authors     DocumentAuthor[]
+  files       File[]
+
+  @@map("documents")
+  @@index([title])
+  @@index([year])
+  @@index([type])
+  @@index([language])
+}
+
+// 文書の著者情報を格納するテーブル
+model Person {
+  id         String    @id @default(uuid())
+  last_name  String
+  first_name String?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  // リレーションシップ
+  documents  DocumentAuthor[]
+
+  @@map("persons")
+  @@index([last_name])
+}
+
+// 文書に関連するファイル（PDF、画像など）の情報を格納するテーブル
+model File {
+  id                String    @id @default(uuid())
+  filename          String
+  original_filename String
+  size              Int
+  mimetype          String
+  gcs_path          String
+  gsutil_uri        String
+  filehash          String
+  document_id       String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  // リレーションシップ
+  document          Document? @relation(fields: [document_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@map("files")
+  @@index([document_id])
+}
+
+// 文書と著者の関係を格納する中間テーブル
+model DocumentAuthor {
+  document_id    String
+  person_id      String
+  order          Int
+
+  // リレーションシップ
+  document       Document  @relation(fields: [document_id], references: [id])
+  person         Person    @relation(fields: [person_id], references: [id])
+
+  @@id([document_id, person_id])
+  @@map("document_authors")
+  @@index([person_id])
+}

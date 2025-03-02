@@ -255,7 +255,11 @@ function createDirectories() {
   
   const directories = [
     path.join(projectRoot, 'data'),
-    path.join(projectRoot, 'logs')
+    path.join(projectRoot, 'logs'),
+    path.join(projectRoot, 'backend', 'storage'),
+    path.join(projectRoot, 'backend', 'storage', 'db'),
+    path.join(projectRoot, 'backend', 'storage', 'files'),
+    path.join(projectRoot, 'backend', 'storage', 'files', 'pdf')
   ];
   
   directories.forEach(dir => {
@@ -264,6 +268,21 @@ function createDirectories() {
       console.log(`- ${path.relative(projectRoot, dir)} ディレクトリを作成しました`);
     } else {
       console.log(`- ${path.relative(projectRoot, dir)} ディレクトリは既に存在します`);
+    }
+  });
+  
+  // .keepファイルを作成して空のディレクトリをGitで管理できるようにする
+  const keepFiles = [
+    path.join(projectRoot, 'backend', 'storage', 'db', '.keep'),
+    path.join(projectRoot, 'backend', 'storage', 'files', 'pdf', '.keep')
+  ];
+  
+  keepFiles.forEach(file => {
+    if (!fs.existsSync(file)) {
+      fs.writeFileSync(file, '');
+      console.log(`- ${path.relative(projectRoot, file)} ファイルを作成しました`);
+    } else {
+      console.log(`- ${path.relative(projectRoot, file)} ファイルは既に存在します`);
     }
   });
   
@@ -349,6 +368,50 @@ ${colors.cyan}${colors.bright}======================================
 `);
 }
 
+/**
+ * Cloud Storageバケットを作成する
+ * @param {string} projectId - GCPプロジェクトID
+ * @param {string} bucketName - 作成するバケット名
+ * @param {string} region - バケットのリージョン
+ * @return {Promise<boolean>} 成功したかどうか
+ */
+async function createStorageBucket(projectId, bucketName, region) {
+  if (!projectId || !bucketName) return false;
+  
+  console.log(`${colors.bright}Cloud Storageバケットを設定しています...${colors.reset}`);
+  console.log(`- バケット名: ${bucketName}`);
+  console.log(`- リージョン: ${region || 'asia-northeast1'}`);
+  
+  // バケットの存在確認
+  try {
+    execSync(`gsutil ls -b gs://${bucketName} 2>/dev/null`, { stdio: 'pipe' });
+    console.log(`${colors.green}バケットは既に存在します${colors.reset}`);
+    return true;
+  } catch (error) {
+    // バケットが存在しない場合は作成
+    console.log(`バケットが存在しないため作成します...`);
+    try {
+      const regionFlag = region ? `-l ${region}` : '';
+      execSync(`gsutil mb ${regionFlag} gs://${bucketName}`, { stdio: 'pipe' });
+      console.log(`${colors.green}バケット作成完了${colors.reset}`);
+      
+      // 標準のストレージクラスを設定
+      execSync(`gsutil defstorageclass set STANDARD gs://${bucketName}`, { stdio: 'pipe' });
+      
+      // ディレクトリ構造を作成
+      console.log(`バケット内のディレクトリ構造を作成しています...`);
+      execSync(`gsutil cp /dev/null gs://${bucketName}/storage/db/.keep`, { stdio: 'pipe' });
+      execSync(`gsutil cp /dev/null gs://${bucketName}/storage/files/pdf/.keep`, { stdio: 'pipe' });
+      
+      console.log(`${colors.green}バケット設定完了${colors.reset}`);
+      return true;
+    } catch (error) {
+      console.log(`${colors.red}バケット作成エラー: ${error.message}${colors.reset}`);
+      return false;
+    }
+  }
+}
+
 module.exports = {
   colors,
   projectRoot,
@@ -362,5 +425,6 @@ module.exports = {
   createDirectories,
   installDependencies,
   checkResourceExists,
-  displayTitle
+  displayTitle,
+  createStorageBucket
 }; 

@@ -2,38 +2,54 @@
   "name": "ezdocs-backend",
   "version": "0.1.0",
   "description": "EzDocs APIバックエンド",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "ts-node-dev --respawn src/index.ts",
+    "dev": "NODE_ENV=development ts-node-dev --respawn src/index.ts",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "db:setup": "NODE_ENV=development DEBUG=prisma:error ts-node src/config/env.ts && npx prisma migrate dev",
+    "db:status": "NODE_ENV=development DEBUG=prisma:error ts-node src/config/env.ts && npx prisma migrate status",
+    "db:studio": "NODE_ENV=development ts-node src/config/env.ts && npx prisma studio",
+    "db:deploy": "NODE_ENV=production DEBUG=prisma:error ts-node src/config/env.ts && npx prisma migrate deploy",
+    "db:deploy:status": "NODE_ENV=production DEBUG=prisma:error ts-node src/config/env.ts && npx prisma migrate status"
   },
   "engines": {
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "zod": "^3.22.4",
+    "@types/dompurify": "^3.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "dotenv-expand": "^10.0.0",
+    "express": "^4.18.2",
     "helmet": "^7.1.0",
+    "isomorphic-dompurify": "^2.22.0",
     "morgan": "^1.10.0",
     "node-fetch": "^3.3.2",
-    "winston": "^3.11.0"
+    "sanitize-html": "^2.14.0",
+    "winston": "^3.11.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@prisma/client": "^6.4.1",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.10.5",
+    "@types/sanitize-html": "^2.13.0",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
+    "msw": "^2.7.3",
+    "prisma": "^6.4.1",
+    "supertest": "^7.0.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3",
     "vitest": "^1.0.4"
   }
-} 
+}

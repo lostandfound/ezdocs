@@ -10,6 +10,7 @@
  * - Google Cloudプロジェクトのセットアップ支援
  * - 必要なディレクトリの作成
  * - 基本的なAPIの有効化
+ * - Cloud Storageバケットの作成
  * 
  * 開発者向けのCI/CD設定は setup-dev.js を使用してください。
  * 
@@ -66,6 +67,29 @@ async function main() {
   
   await common.enableAPIs(projectId, basicApis);
   common.createDirectories();
+  
+  // Cloud Storageバケットの作成
+  try {
+    // バケット名を決め打ちで指定
+    const bucketName = `ezdocs-bucket-${projectId}`;
+    const region = 'asia-northeast1';
+    
+    console.log(`\n${common.colors.cyan}Storageバケット情報:${common.colors.reset}`);
+    console.log(`- プロジェクトID: ${projectId}`);
+    console.log(`- バケット名: ${bucketName}`);
+    console.log(`- リージョン: ${region}`);
+    
+    const createBucket = await common.question(rl, 'Cloud Storageバケットを作成しますか？ (y/n): ');
+    if (createBucket.toLowerCase() === 'y') {
+      await common.createStorageBucket(projectId, bucketName, region);
+    } else {
+      console.log('バケット作成をスキップします。');
+    }
+  } catch (error) {
+    console.log(`${common.colors.yellow}警告: 処理中にエラーが発生しました: ${error.message}${common.colors.reset}`);
+    console.log('バケット作成をスキップします。');
+  }
+  
   await common.installDependencies(rl);
   
   displayCompletionMessage();

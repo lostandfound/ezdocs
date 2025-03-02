@@ -92,6 +92,7 @@ TBD
 ### 3.1 バックエンド
 - サーバレスプラットフォーム: Google Cloud Run（コンテナベースのサーバレスサービス）
 - プログラミング言語: Node.js, TypeScript
+- モジュールシステム: ECMAScript Modules (ESM)
 - Webフレームワーク: Express.js
 - バリデーション: Zod
 - ORM: Prisma
@@ -122,9 +123,22 @@ TBD
 - **Google Cloud Run**：バックエンドサービスのホスティング
 - **Google Cloud Secret Manager**：APIキーやデータベース接続情報などの機密情報管理
 - **Google Cloud Storage**：
-  - SQLite3データベースファイルの保存
-  - PDF・文献ファイルの保存
-  - 非公開バケット設定による安全なアクセス制御
+  - バケット命名規則: `ezdocs-bucket-${PROJECT_ID}`
+  - リージョン: アジア北東1（東京）`asia-northeast1`
+  - ストレージクラス: 標準（STANDARD）
+  - ディレクトリ構造:
+    ```
+    /
+    ├── db/                 # SQLiteデータベースファイル
+    │   ├── production.db   # 本番環境データベース
+    │   └── backup/         # データベースバックアップ
+    └── files/
+        └── pdf/            # PDF文書ファイル
+    ```
+  - アクセス方法: Cloud Runボリュームマウント（gcsfuse）
+  - マウントポイント: `/storage`
+  - データ永続化: Cloud Storageに直接保存
+  - IAMポリシー: Cloud Runサービスアカウントに読み書き権限を付与
 - **Google API Gateway**：API管理とセキュリティコントロール
 - **Google Cloud IAM**：リソースアクセス権限の管理
 - **Google Cloud Build**：CI/CDパイプラインの実行環境
@@ -160,9 +174,24 @@ TBD
 
 ## 6. 運用設計
 ### 6.1 バックアップと復元
-- SQLite3データベースの定期的なスナップショットをCloud Storageに保存
-- バックアップの自動化スケジュール設定
-- Prismaマイグレーション履歴の管理による整合性の確保
+#### データベースのバックアップ
+- **バックアップ戦略**：
+  現在検討中
+
+#### 文書ファイルのバックアップ
+- PDFファイルは自動的にCloud Storageに保存され、Google Cloudの冗長性メカニズムによって保護されます
+
+#### 障害復旧シナリオ
+1. **データベース破損**：
+   - バックアップ戦略は検討中
+   
+2. **Cloud Storage障害**：
+   - Googleの冗長化システムにより自動的に対応されるケースが多い
+   - リージョン障害の場合は、新しいリージョンへの移行を検討
+
+3. **サービス全体の復旧**：
+   - バックアップ戦略は検討中
+   - Cloud Runサービスを再デプロイ
 
 ### 6.2 監視とアラート
 - Google Cloud Monitoringによるリソース使用状況の監視
@@ -188,3 +217,14 @@ TBD
 
 ## 7. 変更履歴
 - 2025/03/02 - バージョン0.1 - 初版作成 - lost_and_found
+
+## APIの制限事項
+
+### リクエスト制限
+
+- **JSONリクエストサイズ**: 最大30MB（PDFファイルのbase64エンコードデータ対応のため）
+- **レート制限**: Google Cloud API Gatewayにより実装
+
+### レスポンス制限
+
+- **レスポンスタイムアウト**: 60秒
