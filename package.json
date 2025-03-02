@@ -1,0 +1,28 @@
+{
+  "name": "ezdocs",
+  "version": "1.0.0",
+  "description": "クラウドベースのシンプルなドキュメント管理システム",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/ezdocs.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "document",
+    "management",
+    "cloud",
+    "bibliography"
+  ],
+  "author": "EzDocs Team",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {}
+} 
