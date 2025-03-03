@@ -1,12 +1,14 @@
 /**
- * URLパラメータのバリデーションスキーマ
+ * URLパラメータ用のZodバリデーションスキーマ
+ * 
+ * このファイルでは、URLパラメータのバリデーションに使用するスキーマを定義します。
  */
 
 import { z } from 'zod';
 import { uuidSchema } from './common';
 
 /**
- * ID指定のURLパラメータ用スキーマ
+ * IDパラメータのスキーマ
  */
 export const idParamSchema = z.object({
   id: uuidSchema,

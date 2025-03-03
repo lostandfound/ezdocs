@@ -81,27 +81,32 @@ export function sanitizeObject(obj: any): any {
  * 
  * XSS対策として、req.body, req.query, req.paramsをサニタイズします。
  * 
- * @param req Express Request オブジェクト
- * @param res Express Response オブジェクト
- * @param next 次のミドルウェア関数
+ * @param sources サニタイズ対象のリクエスト部分（body, params, queryの配列）
+ * @returns Express middleware
  */
-export function sanitize(req: Request, res: Response, next: NextFunction): void {
-  // リクエストボディのサニタイズ
-  if (req.body) {
-    req.body = sanitizeObject(req.body);
-  }
+export const sanitize = (sources: ('body' | 'params' | 'query')[] = ['body']) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      // 指定されたリクエスト部分をサニタイズ
+      for (const source of sources) {
+        if (req[source]) {
+          req[source] = sanitizeObject(req[source]);
+        }
+      }
+      
+      next();
+    } catch (error) {
+      // サニタイズ処理中にエラーが発生した場合は次のミドルウェアへ
+      next(error);
+    }
+  };
+};
 
-  // URLパラメータのサニタイズ
-  if (req.params) {
-    req.params = sanitizeObject(req.params);
-  }
-
-  // クエリパラメータのサニタイズ
-  if (req.query) {
-    req.query = sanitizeObject(req.query);
-  }
-
-  next();
-}
-
-export default sanitize; 
+/**
+ * すべてのリクエストデータをサニタイズするミドルウェア
+ * 
+ * body, params, queryすべてをサニタイズします。
+ */
+export default (req: Request, res: Response, next: NextFunction): void => {
+  sanitize(['body', 'params', 'query'])(req, res, next);
+}; 

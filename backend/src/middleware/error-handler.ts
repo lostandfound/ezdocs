@@ -5,7 +5,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { DocumentNotFoundError } from '../../services/documents';
+import { DocumentNotFoundError } from '../services/documents';
 
 // カスタムエラー型の定義
 interface AppError extends Error {

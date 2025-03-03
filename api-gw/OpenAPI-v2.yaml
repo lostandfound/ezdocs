@@ -23,6 +23,8 @@ schemes:
 tags:
   - name: documents
     description: 文書リソース操作
+  - name: persons
+    description: 著者リソース操作
 
 paths:
   /api/documents:
@@ -160,6 +162,262 @@ paths:
           description: 削除成功
         '404':
           description: リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/persons:
+    get:
+      summary: 著者リソース一覧の取得
+      description: ページネーション対応の著者リソース一覧を取得します。
+      operationId: getPersons
+      tags:
+        - persons
+      parameters:
+        - name: page
+          in: query
+          description: 取得するページ番号（デフォルト: 1）
+          required: false
+          type: integer
+          default: 1
+          minimum: 1
+        - name: limit
+          in: query
+          description: 1ページあたりの件数（デフォルト: 20、最大: 100）
+          required: false
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 100
+        - name: q
+          in: query
+          description: 検索キーワード（姓名で部分一致検索）
+          required: false
+          type: string
+      responses:
+        '200':
+          description: 成功レスポンス
+          schema:
+            $ref: '#/definitions/PersonList'
+        '400':
+          description: 不正なリクエスト
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+    
+    post:
+      summary: 新規著者リソースの作成
+      description: 新しい著者リソースを作成します。
+      operationId: createPerson
+      tags:
+        - persons
+      parameters:
+        - name: person
+          in: body
+          description: 著者リソースのデータ
+          required: true
+          schema:
+            $ref: '#/definitions/PersonCreateRequest'
+      responses:
+        '201':
+          description: 作成成功
+          schema:
+            $ref: '#/definitions/Person'
+        '400':
+          description: 不正なリクエスト
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+  
+  /api/persons/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: 著者リソースのID（UUID形式）
+        required: true
+        type: string
+        format: uuid
+    
+    get:
+      summary: 特定の著者リソースの取得
+      description: 指定されたIDの著者リソースを取得します。
+      operationId: getPersonById
+      tags:
+        - persons
+      responses:
+        '200':
+          description: 成功レスポンス
+          schema:
+            $ref: '#/definitions/Person'
+        '404':
+          description: リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+    
+    put:
+      summary: 著者リソースの更新
+      description: 指定されたIDの著者リソースを更新します。
+      operationId: updatePerson
+      tags:
+        - persons
+      parameters:
+        - name: person
+          in: body
+          description: 著者リソースの更新データ
+          required: true
+          schema:
+            $ref: '#/definitions/PersonUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/Person'
+        '400':
+          description: 不正なリクエスト
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+    
+    delete:
+      summary: 著者リソースの削除
+      description: 指定されたIDの著者リソースを削除します。
+      operationId: deletePerson
+      tags:
+        - persons
+      responses:
+        '204':
+          description: 削除成功
+        '404':
+          description: リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/persons/{id}/documents:
+    parameters:
+      - name: id
+        in: path
+        description: 著者リソースのID（UUID形式）
+        required: true
+        type: string
+        format: uuid
+    
+    get:
+      summary: 著者に関連する文書リソース一覧の取得
+      description: 指定された著者に関連する文書リソースの一覧を取得します。
+      operationId: getPersonDocuments
+      tags:
+        - persons
+      parameters:
+        - name: page
+          in: query
+          description: 取得するページ番号（デフォルト: 1）
+          required: false
+          type: integer
+          default: 1
+          minimum: 1
+        - name: limit
+          in: query
+          description: 1ページあたりの件数（デフォルト: 20、最大: 100）
+          required: false
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 100
+      responses:
+        '200':
+          description: 成功レスポンス
+          schema:
+            $ref: '#/definitions/DocumentList'
+        '404':
+          description: 著者リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+    
+    post:
+      summary: 著者と文書の関連付け
+      description: 指定された著者と文書を関連付けます。
+      operationId: associateDocument
+      tags:
+        - persons
+      parameters:
+        - name: documentAuthor
+          in: body
+          description: 文書と著者の関連付けデータ
+          required: true
+          schema:
+            $ref: '#/definitions/DocumentAuthorRequest'
+      responses:
+        '201':
+          description: 関連付け成功
+          schema:
+            $ref: '#/definitions/DocumentAuthor'
+        '400':
+          description: 不正なリクエスト
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: 著者または文書リソースが見つからない
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: サーバー内部エラー
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/persons/{id}/documents/{document_id}:
+    parameters:
+      - name: id
+        in: path
+        description: 著者リソースのID（UUID形式）
+        required: true
+        type: string
+        format: uuid
+      - name: document_id
+        in: path
+        description: 文書リソースのID（UUID形式）
+        required: true
+        type: string
+        format: uuid
+    
+    delete:
+      summary: 著者と文書の関連付け解除
+      description: 指定された著者と文書の関連付けを解除します。
+      operationId: dissociateDocument
+      tags:
+        - persons
+      responses:
+        '204':
+          description: 関連付け解除成功
+        '404':
+          description: 著者または文書リソース、または関連付けが見つからない
           schema:
             $ref: '#/definitions/Error'
         '500':
@@ -433,4 +691,92 @@ definitions:
         type: object
         description: エラーの詳細情報
         additionalProperties:
-          type: string 
+          type: string
+  
+  PersonCreateRequest:
+    type: object
+    required:
+      - last_name
+    properties:
+      last_name:
+        type: string
+        description: 著者の姓
+      first_name:
+        type: string
+        description: 著者の名（オプション）
+  
+  PersonUpdateRequest:
+    type: object
+    properties:
+      last_name:
+        type: string
+        description: 著者の姓
+      first_name:
+        type: string
+        description: 著者の名
+  
+  Person:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: 著者のユニークID
+      last_name:
+        type: string
+        description: 著者の姓
+      first_name:
+        type: string
+        description: 著者の名（null可）
+      created_at:
+        type: string
+        format: date-time
+        description: 作成日時
+      updated_at:
+        type: string
+        format: date-time
+        description: 更新日時
+  
+  PersonList:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/Person'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  
+  DocumentAuthorRequest:
+    type: object
+    required:
+      - document_id
+      - order
+    properties:
+      document_id:
+        type: string
+        format: uuid
+        description: 文書リソースのID
+      order:
+        type: integer
+        minimum: 1
+        description: 著者の順序（1から始まる整数）
+  
+  DocumentAuthor:
+    type: object
+    properties:
+      document_id:
+        type: string
+        format: uuid
+        description: 文書リソースのID
+      person_id:
+        type: string
+        format: uuid
+        description: 著者リソースのID
+      order:
+        type: integer
+        description: 著者の順序
+      document:
+        $ref: '#/definitions/DocumentSummary'
+      person:
+        $ref: '#/definitions/Person' 

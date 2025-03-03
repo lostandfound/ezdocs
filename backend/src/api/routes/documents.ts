@@ -7,8 +7,8 @@
 
 import { Router } from 'express';
 import { DocumentsController } from '../controllers/documents';
-import { validate } from '../middlewares/validate';
-import { sanitize } from '../middlewares/sanitize';
+import { validate, validateSingle } from '../../middleware/validate';
+import { sanitize } from '../../middleware/sanitize';
 import { paginationSchema } from '../../schemas/common';
 import { createDocumentSchema, updateDocumentSchema } from '../../schemas/documents';
 import { idParamSchema } from '../../schemas/params';
@@ -22,18 +22,18 @@ const documentsRouter = Router();
 documentsRouter.get(
   '/',
   sanitize(['query']),
-  validate(paginationSchema, 'query'),
+  validateSingle(paginationSchema, 'query'),
   DocumentsController.getDocuments
 );
 
 /**
  * GET /api/documents/:id
- * 特定のドキュメントを取得
+ * ドキュメント詳細を取得
  */
 documentsRouter.get(
   '/:id',
   sanitize(['params']),
-  validate(idParamSchema, 'params'),
+  validateSingle(idParamSchema, 'params'),
   DocumentsController.getDocumentById
 );
 
@@ -44,7 +44,7 @@ documentsRouter.get(
 documentsRouter.post(
   '/',
   sanitize(['body']),
-  validate(createDocumentSchema),
+  validateSingle(createDocumentSchema),
   DocumentsController.createDocument
 );
 
@@ -55,8 +55,10 @@ documentsRouter.post(
 documentsRouter.put(
   '/:id',
   sanitize(['params', 'body']),
-  validate(idParamSchema, 'params'),
-  validate(updateDocumentSchema),
+  validate({
+    params: idParamSchema,
+    body: updateDocumentSchema
+  }),
   DocumentsController.updateDocument
 );
 
@@ -67,7 +69,7 @@ documentsRouter.put(
 documentsRouter.delete(
   '/:id',
   sanitize(['params']),
-  validate(idParamSchema, 'params'),
+  validateSingle(idParamSchema, 'params'),
   DocumentsController.deleteDocument
 );
 

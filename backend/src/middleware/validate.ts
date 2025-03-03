@@ -61,4 +61,20 @@ export const validate = (schemas: ValidateOptions) => {
       });
     }
   };
+};
+
+/**
+ * 単一のスキーマを使用したバリデーションミドルウェアを生成する関数
+ * 
+ * @param schema バリデーションに使用するZodスキーマ
+ * @param source バリデーション対象のリクエスト部分（body, params, query）
+ * @returns Expressミドルウェア
+ */
+export const validateSingle = (
+  schema: AnyZodObject,
+  source: 'body' | 'params' | 'query' = 'body'
+) => {
+  const options: ValidateOptions = {};
+  options[source] = schema;
+  return validate(options);
 }; 

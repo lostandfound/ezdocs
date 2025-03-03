@@ -12,7 +12,7 @@ import morgan from 'morgan';
 import { z } from 'zod';
 import { runMigrations } from './db/migrations'; // マイグレーションヘルパーのインポート
 import apiRouter from './api/routes'; // APIルーターのインポート
-import { errorHandler } from './api/middlewares/error-handler'; // エラーハンドラーのインポート
+import { errorHandler } from './middleware/error-handler'; // エラーハンドラーのインポート
 
 // アプリケーションのポート設定
 const PORT = process.env.PORT || 8080;
