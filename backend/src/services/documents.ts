@@ -57,9 +57,9 @@ export class DocumentsService {
       data: documents,
       pagination: {
         total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit),
+        page: Number(page),
+        limit: Number(limit),
+        pages: Math.ceil(total / limit) || 0,
       },
     };
   }

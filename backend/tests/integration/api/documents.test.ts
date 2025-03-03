@@ -193,7 +193,7 @@ describe('ドキュメントAPI', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('status', 'error');
-      expect(response.body).toHaveProperty('code', 'VALIDATION_ERROR');
+      expect(response.body).toHaveProperty('code', 'INVALID_ID_FORMAT');
     });
   });
 
@@ -415,7 +415,7 @@ describe('ドキュメントAPI', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('status', 'error');
-      expect(response.body).toHaveProperty('code', 'VALIDATION_ERROR');
+      expect(response.body).toHaveProperty('code', 'INVALID_ID_FORMAT');
     });
   });
 

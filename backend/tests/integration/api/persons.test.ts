@@ -55,12 +55,13 @@ describe('著者API', () => {
         .expect(200);
       
       expect(response.body).toEqual({
-        items: [],
+        status: 'success',
+        data: [],
         pagination: {
-          total_items: 0,
-          current_page: 1,
-          items_per_page: 10,
-          total_pages: 0
+          total: 0,
+          page: 1,
+          limit: 10,
+          pages: 0
         }
       });
     });
@@ -73,12 +74,13 @@ describe('著者API', () => {
         .get('/api/persons')
         .expect(200);
       
-      expect(response.body.items).toHaveLength(5);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveLength(5);
       expect(response.body.pagination).toEqual({
-        total_items: 5,
-        current_page: 1,
-        items_per_page: 10,
-        total_pages: 1
+        total: 5,
+        page: 1,
+        limit: 10,
+        pages: 1
       });
     });
     
@@ -98,10 +100,10 @@ describe('著者API', () => {
       );
       
       expect(response.body.pagination).toEqual({
-        total_items: 20,
-        current_page: 2,
-        items_per_page: 5,
-        total_pages: 4
+        total: 20,
+        page: 2,
+        limit: 5,
+        pages: 4
       });
     });
     
@@ -110,7 +112,7 @@ describe('著者API', () => {
       const persons = await createTestPersons(5);
       
       await getTestClient()
-        .get('/api/persons?q=テスト')
+        .get('/api/persons?search=テスト')
         .expect(200);
       
       expect(testPrisma.person.findMany).toHaveBeenCalledWith(
@@ -132,11 +134,14 @@ describe('著者API', () => {
         .get(`/api/persons/${person.id}`)
         .expect(200);
       
-      expect(response.body).toEqual(expect.objectContaining({
-        id: person.id,
-        last_name: person.last_name,
-        first_name: person.first_name
-      }));
+      expect(response.body).toEqual({
+        status: 'success',
+        data: expect.objectContaining({
+          id: person.id,
+          last_name: person.last_name,
+          first_name: person.first_name
+        })
+      });
     });
     
     it('存在しない著者IDの場合は404を返す', async () => {
@@ -189,11 +194,15 @@ describe('著者API', () => {
         data: validPersonCreateRequest
       });
       
-      expect(response.body).toEqual(expect.objectContaining({
-        id: mockPerson.id,
-        last_name: mockPerson.last_name,
-        first_name: mockPerson.first_name
-      }));
+      expect(response.body).toEqual({
+        status: 'success',
+        data: expect.objectContaining({
+          id: mockPerson.id,
+          last_name: mockPerson.last_name,
+          first_name: mockPerson.first_name
+        }),
+        message: expect.stringContaining('作成')
+      });
     });
     
     it('無効なデータの場合は400を返す', async () => {
@@ -264,11 +273,15 @@ describe('著者API', () => {
         data: partialPersonUpdateRequest
       });
       
-      expect(response.body).toEqual(expect.objectContaining({
-        id: person.id,
-        last_name: partialPersonUpdateRequest.last_name,
-        first_name: person.first_name // 変更されていない
-      }));
+      expect(response.body).toEqual({
+        status: 'success',
+        data: expect.objectContaining({
+          id: person.id,
+          last_name: partialPersonUpdateRequest.last_name,
+          first_name: person.first_name // 変更されていない
+        }),
+        message: expect.stringContaining('更新')
+      });
     });
     
     it('存在しない著者IDの場合は404を返す', async () => {
@@ -348,12 +361,13 @@ describe('著者API', () => {
         .get(`/api/persons/${person.id}/documents`)
         .expect(200);
       
-      expect(response.body.items).toHaveLength(1);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveLength(1);
       expect(response.body.pagination).toEqual({
-        total_items: 1,
-        current_page: 1,
-        items_per_page: 10,
-        total_pages: 1
+        total: 1,
+        page: 1,
+        limit: 10,
+        pages: 1
       });
     });
     
@@ -390,11 +404,12 @@ describe('著者API', () => {
         })
       );
       
+      expect(response.body.status).toBe('success');
       expect(response.body.pagination).toEqual({
-        total_items: 20,
-        current_page: 2,
-        items_per_page: 5,
-        total_pages: 4
+        total: 20,
+        page: 2,
+        limit: 5,
+        pages: 4
       });
     });
     
@@ -443,11 +458,15 @@ describe('著者API', () => {
         }
       });
       
-      expect(response.body).toEqual(expect.objectContaining({
-        person_id: person.id,
-        document_id: document.id,
-        order: associationData.order
-      }));
+      expect(response.body).toEqual({
+        status: 'success',
+        data: expect.objectContaining({
+          person_id: person.id,
+          document_id: document.id,
+          order: associationData.order
+        }),
+        message: expect.stringContaining('関連付け')
+      });
     });
     
     it('無効なデータの場合は400を返す', async () => {

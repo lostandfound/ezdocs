@@ -8,8 +8,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { DocumentsService, DocumentNotFoundError } from '../../services/documents';
 import prisma from '../../db/prisma';
-import { PaginationQuery } from '../../schemas/common';
-import { CreateDocumentDto, UpdateDocumentDto } from '../../schemas/documents';
+import { PaginationQuery, paginationSchema, uuidSchema } from '../../schemas/common';
+import { CreateDocumentDto, UpdateDocumentDto, createDocumentSchema, updateDocumentSchema } from '../../schemas/documents';
+import { ZodError } from 'zod';
 
 // サービスのインスタンスを作成
 const documentsService = new DocumentsService(prisma);
@@ -25,7 +26,18 @@ export class DocumentsController {
     next: NextFunction
   ) {
     try {
-      const result = await documentsService.findAll(req.query as unknown as PaginationQuery);
+      // ページネーションパラメーターのバリデーション
+      const validatedQuery = paginationSchema.safeParse(req.query);
+      if (!validatedQuery.success) {
+        return res.status(400).json({
+          status: 'error',
+          code: 'VALIDATION_ERROR',
+          message: 'ページネーションパラメーターが不正です',
+          details: validatedQuery.error.format()
+        });
+      }
+
+      const result = await documentsService.findAll(validatedQuery.data);
       
       res.json(result);
     } catch (error) {
@@ -43,13 +55,31 @@ export class DocumentsController {
     next: NextFunction
   ) {
     try {
-      const document = await documentsService.findById(req.params.id);
+      // IDのバリデーション
+      const validatedId = uuidSchema.safeParse(req.params.id);
+      if (!validatedId.success) {
+        return res.status(400).json({
+          status: 'error',
+          code: 'INVALID_ID_FORMAT',
+          message: 'ドキュメントIDの形式が不正です',
+          details: validatedId.error.format()
+        });
+      }
+
+      const document = await documentsService.findById(validatedId.data);
       
       res.json({
         status: 'success',
         data: document,
       });
     } catch (error) {
+      if (error instanceof DocumentNotFoundError) {
+        return res.status(404).json({
+          status: 'error',
+          code: 'DOCUMENT_NOT_FOUND',
+          message: error.message
+        });
+      }
       next(error);
     }
   }
@@ -64,7 +94,18 @@ export class DocumentsController {
     next: NextFunction
   ) {
     try {
-      const document = await documentsService.create(req.body as CreateDocumentDto);
+      // リクエストボディのバリデーション
+      const validatedBody = createDocumentSchema.safeParse(req.body);
+      if (!validatedBody.success) {
+        return res.status(400).json({
+          status: 'error',
+          code: 'VALIDATION_ERROR',
+          message: 'ドキュメント作成データが不正です',
+          details: validatedBody.error.format()
+        });
+      }
+
+      const document = await documentsService.create(validatedBody.data);
       
       res.status(201).json({
         status: 'success',
@@ -86,9 +127,31 @@ export class DocumentsController {
     next: NextFunction
   ) {
     try {
+      // IDのバリデーション
+      const validatedId = uuidSchema.safeParse(req.params.id);
+      if (!validatedId.success) {
+        return res.status(400).json({
+          status: 'error',
+          code: 'INVALID_ID_FORMAT',
+          message: 'ドキュメントIDの形式が不正です',
+          details: validatedId.error.format()
+        });
+      }
+
+      // リクエストボディのバリデーション
+      const validatedBody = updateDocumentSchema.safeParse(req.body);
+      if (!validatedBody.success) {
+        return res.status(400).json({
+          status: 'error',
+          code: 'VALIDATION_ERROR',
+          message: 'ドキュメント更新データが不正です',
+          details: validatedBody.error.format()
+        });
+      }
+
       const document = await documentsService.update(
-        req.params.id, 
-        req.body as UpdateDocumentDto
+        validatedId.data, 
+        validatedBody.data
       );
       
       res.json({
@@ -97,6 +160,13 @@ export class DocumentsController {
         message: 'ドキュメントが正常に更新されました',
       });
     } catch (error) {
+      if (error instanceof DocumentNotFoundError) {
+        return res.status(404).json({
+          status: 'error',
+          code: 'DOCUMENT_NOT_FOUND',
+          message: error.message
+        });
+      }
       next(error);
     }
   }
@@ -111,10 +181,28 @@ export class DocumentsController {
     next: NextFunction
   ) {
     try {
-      await documentsService.delete(req.params.id);
+      // IDのバリデーション
+      const validatedId = uuidSchema.safeParse(req.params.id);
+      if (!validatedId.success) {
+        return res.status(400).json({
+          status: 'error',
+          code: 'INVALID_ID_FORMAT',
+          message: 'ドキュメントIDの形式が不正です',
+          details: validatedId.error.format()
+        });
+      }
+
+      await documentsService.delete(validatedId.data);
       
       res.status(204).send();
     } catch (error) {
+      if (error instanceof DocumentNotFoundError) {
+        return res.status(404).json({
+          status: 'error',
+          code: 'DOCUMENT_NOT_FOUND',
+          message: error.message
+        });
+      }
       next(error);
     }
   }
